@@ -328,6 +328,7 @@ teencode_list = {
     'oy': 'rồi',
     'jo': 'giờ',
     'clmm': 'cái lồn mẹ mày',
+    'l': 'lồn',
     'bsvv': 'buổi sáng vui vẻ',
     'troai': 'trai',
     'wa': 'quá',
