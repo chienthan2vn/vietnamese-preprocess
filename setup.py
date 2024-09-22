@@ -20,7 +20,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_dir = {"": "vietnamese-preprocess"},
-    packages = setuptools.find_packages(where="src"),
+    package_dir = {"": "src"},
+    packages = setuptools.find_packages(where="vietnamese-preprocess"),
     python_requires = ">=3.6"
 )
