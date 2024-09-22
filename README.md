@@ -15,10 +15,10 @@ bash requirements.sh
 ```
 ## Use
 ```
-from vnpreprocess.utils.process import Process
+from vnpreprocess.utils import process
 
 line = "t thích m!!!"
-hand = Process()
+hand = process.Process()
 hand = hand.tien_xu_li(line)
 print(line)
 ```
