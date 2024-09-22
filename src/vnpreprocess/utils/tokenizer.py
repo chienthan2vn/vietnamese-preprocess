@@ -1,7 +1,10 @@
-import py_vncorenlp
+from py_vncorenlp import VnCoreNLP
 
 class Tokenizer:
     def __init__(self) -> None:
-        pass
+        self.rdrsegmenter = VnCoreNLP("vnpreprocess/package/vncorenlp/VnCoreNLP-1.2.jar", annotators="wseg")
+
+
     def word_segment(self, text):
-        pass
+        line = self.rdrsegmenter.word_segment(text)
+        return ' '.join(line)

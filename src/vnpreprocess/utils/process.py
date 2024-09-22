@@ -157,12 +157,18 @@ class Process():
             nText += ''.join(p.teencode_list.get(word, word)+ " ")
         return nText
 
+
+    def remove_html(self, txt):
+        return re.sub(r'<[^>]*>', '', txt)
+
+
     def tien_xu_li(self, text):
-        text = self.chuan_hoa_unicode(text)
-        text = self.chuyen_chu_thuong(text)
+        text = self.de_teencode(text)
+        text = self.remove_html(text)
         text = self.xoa_url(text)
         text = self.xoa_ngoac(text)
+        text = self.chuan_hoa_unicode(text)
+        text = self.chuyen_chu_thuong(text)
         text = self.chuan_hoa_cau(text)
-        text = self.de_teencode(text)
         text = self.chuan_hoa_dau_cau_tieng_viet(text)
         return text
