@@ -164,7 +164,7 @@ class Process():
 
 
     def remove_emoji(self, text):
-        return emoji.get_emoji_regexp().sub(u'', text)
+        return emoji.replace_emoji(text, replace='')
     
 
     def tien_xu_li(self, text):
