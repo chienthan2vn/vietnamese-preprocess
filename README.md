@@ -5,11 +5,11 @@ Apply to remove urls, brackets; standardize unicode, teencode, punctuation; lowe
 ```
 pip install git+https://github.com/chienthan2vn/vietnamese-preprocess.git
 ```
-For windows, run the following command:
+For windows, copy&run the following command:
 ```
 requirements.exe
 ```
-For linux, run the following command:
+For linux, copy&run the following command:
 ```
 bash requirements.sh
 ```
