@@ -21,6 +21,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     package_dir = {"": "vietnamese-preprocess"},
-    packages = setuptools.find_packages(where=""),
+    packages = setuptools.find_packages(where="vietnamese-preprocess"),
     python_requires = ">=3.6"
 )
