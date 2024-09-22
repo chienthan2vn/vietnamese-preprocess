@@ -20,7 +20,7 @@ from vnpreprocess.utils import process
 line = "t thích m!!!"
 hand = process.Process()
 hand = hand.tien_xu_li(line)
-print(line)
+print(hand)
 ```
 output of example
 ```
