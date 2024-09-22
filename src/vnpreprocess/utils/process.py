@@ -1,5 +1,5 @@
 import unicodedata
-import re
+import  regex as re
 import vnpreprocess as p
 
 class Process():

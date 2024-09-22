@@ -17,7 +17,7 @@ bash requirements.sh
 ```
 from vnpreprocess.utils.process import Process
 
-line = "t thích m <3"
+line = "t thích m!!!"
 hand = Process.tien_xu_li(line)
 print(line)
 ```
