@@ -510,20 +510,25 @@ m	mày
 t	tao
 c	cậu
 cko	chó
-^_^	tích cực
-:)	tích cực
-:(	tiêu cực
-❤️	tích cực
-👍	tích cực
-🎉	tích cực
-😀	tích cực
-😍	tích cực
-😂	tích cực
-🤗	tích cực
-😙	tích cực
-🙂	tích cực
-😔	tiêu cực
-😓	tiêu cực
-⭐	star
-*	star
-🌟	star
+^_^	mặt cười
+:)	mặt cười
+:(	mặt buồn
+:d	mặt cười
+:<	mặt buồn
+:>	mặt buồn
+@@	mặt bối rối
+:v	mặt bối rối
+❤️	trái tim
+👍	like
+🎉	bắn pháo hoa
+😀	mặt cười
+😍	mặt cười
+😂	mặt cười
+🤗	mặt cười
+😙	mặt cười
+🙂	mặt cười
+😔	mặt buồn
+😓	mặt buồn
+⭐	sao
+*	sao
+🌟	sao
