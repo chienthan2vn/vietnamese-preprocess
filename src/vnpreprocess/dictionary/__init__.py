@@ -25,7 +25,7 @@ teencode_list = {
     'pn': 'bạn',
     'pjt': 'biết',
     'thjk': 'thích',
-    'keke': 'ce ce',
+    'keke': 'cười',
     'ktra': 'kiểm tra',
     'nek': 'nè',
     'cgái': 'con gái',
@@ -327,7 +327,7 @@ teencode_list = {
     'zạ': 'dạ',
     'yey': 'yeah',
     'yep': 'đúng rồi',
-    'sr': 'xin lỗi'
+    'sr': 'xin lỗi',
     'cmn': 'con mẹ nó',
     'face': 'facebook',
     'hjhj': 'hi hi',
