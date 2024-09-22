@@ -169,21 +169,12 @@ class Process():
 
     def tien_xu_li(self, text):
         text = self.remove_html(text)
-        print(text)
         text = self.xoa_url(text)
-        print(text)
         text = self.xoa_ngoac(text)
-        print(text)
         text = self.chuan_hoa_cau(text)
-        print(text)
         text = self.chuyen_chu_thuong(text)
-        print(text)
         text = self.de_teencode(text)
-        print(text)
         text = self.remove_emoji(text)
-        print(text)
         text = self.chuan_hoa_unicode(text)
-        print(text)
         text = self.chuan_hoa_dau_cau_tieng_viet(text)
-        print(text)
         return text
