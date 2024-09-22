@@ -1,4 +1,4 @@
-teencode_list = dict{
+teencode_list = {
     'ctrai': 'con trai',
     'khôg': 'không',
     'bme': 'bố mẹ',
