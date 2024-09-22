@@ -1,5 +1,6 @@
 import unicodedata
-import  regex as re
+import regex as re
+import emoji
 import vnpreprocess as p
 
 class Process():
@@ -158,15 +159,20 @@ class Process():
         return nText
 
 
-    def remove_html(self, txt):
-        return re.sub(r'<[^>]*>', '', txt)
+    def remove_html(self, text):
+        return re.sub(r'<[^>]*>', '', text)
 
+
+    def remove_emoji(self, text):
+        return emoji.get_emoji_regexp().sub(u'', text)
+    
 
     def tien_xu_li(self, text):
         text = self.de_teencode(text)
         text = self.remove_html(text)
         text = self.xoa_url(text)
         text = self.xoa_ngoac(text)
+        text = self.remove_emoji(text)
         text = self.chuan_hoa_unicode(text)
         text = self.chuyen_chu_thuong(text)
         text = self.chuan_hoa_cau(text)
