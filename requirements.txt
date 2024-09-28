@@ -1,0 +1,3 @@
+unicodedata2
+setuptools
+emoji

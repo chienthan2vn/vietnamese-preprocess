@@ -142,7 +142,8 @@ class Process():
 
     #Xoa ngoac va noi dung trong ngoac
     def xoa_ngoac(self, text):
-        return re.sub(r'\[.*?\]|\(.*?\)|<.*?>|\{.*?\}', '', text)
+        text = re.sub(r'\[.*?\]|\(.*?\)|<.*?>|\{.*?\}', '', text)
+        return re.sub(r'\s+', ' ', text)
 
     # Xóa đi các dấu cách thừa các từ không cần thiết cho việc phân loại vẳn bản 
     def chuan_hoa_cau(self, text):

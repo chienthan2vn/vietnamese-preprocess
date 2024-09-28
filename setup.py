@@ -1,11 +1,10 @@
 import setuptools
 import os
 
-os.system(f'bash requirements.sh')
-
 with open("README.md", "r", encoding = "utf-8") as fh:
     long_description = fh.read()
-
+with open("requirements.txt", "r", encoding = "utf-8") as fh:
+    requirements = [re.strip() for re in fh.readlines()]
 setuptools.setup(
     name = "vietnamese-preprocess",
     version = "0.0.1",
@@ -23,7 +22,9 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    install_requires=requirements,
     package_dir = {"": "src"},
     packages = setuptools.find_packages(where="src"),
+    include_package_data=True,
     python_requires = ">=3.6"
 )
