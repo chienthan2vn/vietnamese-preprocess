@@ -136,6 +136,7 @@ júp	giúp
 lặg	lặng
 vđê	vấn đề
 bbè	bạn bè
+bb	bạn bè
 bóg	bóng
 dky	đăng ký
 dòg	dòng
@@ -301,6 +302,7 @@ loz	lồn
 lozz	lồn
 trc	trước
 chs	chẳng hiểu sao
+cks	chơi
 đhs	đéo hiểu sao
 qá	quá
 ntn	như thế nào

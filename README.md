@@ -10,14 +10,14 @@ pip install git+https://github.com/chienthan2vn/vietnamese-preprocess.git
 ```
 from vnpreprocess.utils import process
 
-line = "t thích m!!!"
+line = "T thik cks đá bóng vào mỗi buổi chiều (6h45) vs bb:>>>."
 hand = process.Process()
 hand = hand.tien_xu_li(line)
 print(hand)
 ```
 output of example
 ```
-tao thích mày
+tao thích chơi đá bóng vào mỗi buổi chiều với bạn bè
 ```
 
 ### Copyright ©️ Thuan Luong
