@@ -5,14 +5,7 @@ Apply to remove urls, brackets; standardize unicode, teencode, punctuation; lowe
 ```
 pip install git+https://github.com/chienthan2vn/vietnamese-preprocess.git
 ```
-For windows, copy&run the following command:
-```
-requirements.exe
-```
-For linux, copy&run the following command:
-```
-bash requirements.sh
-```
+
 ## Use
 ```
 from vnpreprocess.utils import process
@@ -27,4 +20,4 @@ output of example
 tao thích mày
 ```
 
-## Copyright ©️ Thuan Luong
+### Copyright ©️ Thuan Luong
