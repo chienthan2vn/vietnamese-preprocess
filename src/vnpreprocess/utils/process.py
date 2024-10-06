@@ -56,7 +56,7 @@ def url(text):
 
 # remove special character
 def special_character(text):
-    text = re.sub(r'\d+', lambda m: " ", text)
+    # text = re.sub(r'\d+', lambda m: " ", text)
     # text = re.sub(r'\b(\w+)\s+\1\b',' ', text) #remove duplicate number word
     text = re.sub(r"[~!@#$%^&*()_+{}“”|:\"<>?`´\[\];\\\/.,-]", " ", text)
     text = re.sub('  +', ' ', text).strip()
@@ -83,9 +83,26 @@ def tag(text):
     return text
 
 
+def remove_duplicate_special_chars(text):
+    text = re.sub(r'([^\w\s])\1+', r'\1', text)
+    return text
+
+
 # """Remove all mixed words and numbers"""
 def mixed_word_number(text):
     text = ' '.join(s for s in text.split() if not any(c.isdigit() for c in s))
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+# Sử dụng biểu thức chính quy để tách các từ có số và chữ đi liền với nhau
+def separate_words_with_numbers(text):
+    separated_text = re.sub(r'(\D)(\d)', r'\1 \2', text)
+    separated_text = re.sub(r'(\d)(\D)', r'\1 \2', separated_text)
+    return separated_text
+
+
+def remove_multispace(text):
     text = re.sub('  +', ' ', text).strip()
     return text
 
@@ -175,6 +192,10 @@ def abbreviation_kk(text):
                     else:
                         if 'hihi' in t:
                             text = text.replace(t, ' ha ha ')
+                        else:
+                            if 'kaka' in t:
+                                text = text.replace(t, ' ha ha ')
+
     text = re.sub('  +', ' ', text).strip()
     return text
 
@@ -258,19 +279,21 @@ def abbreviation_predict(t):
 
 def preprocessing(text):
     text = text.lower()
+    text = remove_duplicate_special_chars(text)
     text = convert_character2emoji(text)
     text = url(text)
     text = mail(text)
     text = tag(text)
-    text = mixed_word_number(text)
     text = special_character_1(text)  # ##remove , . ? !
     text = abbreviation_kk(text)
     text = abbreviation_special(text)
     text = convert_character2emoji(text)
+    text = convert_emoji2word(text)
     text = remove_emoji(text)
     text = repeated_character(text)
     text = special_character(text)
     text = abbreviation_normal(text)
     text = abbreviation_predict(text)
+    text = remove_multispace(text)
     text = tokenize(text)
     return text

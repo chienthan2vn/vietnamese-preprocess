@@ -7,7 +7,7 @@ with open("requirements.txt", "r", encoding = "utf-8") as fh:
     requirements = [re.strip() for re in fh.readlines()]
 setuptools.setup(
     name = "vnpreprocess",
-    version = "0.0.1",
+    version = "0.0.2",
     description='Preprocess Vietnamese language',
     url='https://github.com/chienthan2vn/vietnamese-preprocess',
     author='Thuan Luong',
