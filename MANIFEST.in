@@ -1,3 +1,2 @@
-include README.md
 include src/vnpreprocess/dictionary/*.xlsx
 include src/vnpreprocess/model/abb_model.sav
