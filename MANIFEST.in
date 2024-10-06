@@ -1,4 +1,3 @@
 include README.md
-global-exclude *.xlsx
-global-exclude *.txt
-include vietnamese-preprocess/src/vnpreprocess/model/abb_model.sav
+include src/vnpreprocess/dictionary/*.xlsx
+include src/vnpreprocess/model/abb_model.sav
