@@ -1,181 +1,276 @@
-import unicodedata
+import pandas as pd
+import numpy as np
+from scipy import sparse
 import regex as re
-import emoji
-import vnpreprocess as p
-
-class Process():
-    def __init__(self):
-        self.bang_nguyen_am = [['a', 'à', 'á', 'ả', 'ã', 'ạ', 'a'],
-                  ['ă', 'ằ', 'ắ', 'ẳ', 'ẵ', 'ặ', 'aw'],
-                  ['â', 'ầ', 'ấ', 'ẩ', 'ẫ', 'ậ', 'aa'],
-                  ['e', 'è', 'é', 'ẻ', 'ẽ', 'ẹ', 'e'],
-                  ['ê', 'ề', 'ế', 'ể', 'ễ', 'ệ', 'ee'],
-                  ['i', 'ì', 'í', 'ỉ', 'ĩ', 'ị', 'i'],
-                  ['o', 'ò', 'ó', 'ỏ', 'õ', 'ọ', 'o'],
-                  ['ô', 'ồ', 'ố', 'ổ', 'ỗ', 'ộ', 'oo'],
-                  ['ơ', 'ờ', 'ớ', 'ở', 'ỡ', 'ợ', 'ow'],
-                  ['u', 'ù', 'ú', 'ủ', 'ũ', 'ụ', 'u'],
-                  ['ư', 'ừ', 'ứ', 'ử', 'ữ', 'ự', 'uw'],
-                  ['y', 'ỳ', 'ý', 'ỷ', 'ỹ', 'ỵ', 'y']]
-        self.bang_ky_tu_dau = ['', 'f', 's', 'r', 'x', 'j']
-        self.nguyen_am_to_ids = {}
-
-        for i in range(len(self.bang_nguyen_am)):
-            for j in range(len(self.bang_nguyen_am[i]) - 1):
-                self.nguyen_am_to_ids[self.bang_nguyen_am[i][j]] = (i, j)
-
-    """
-    Chuẩn hóa unicode 
-    Có 2 loại unicode : unicode tổ hơp và unicode dựng sẵn, điêu này dẫn tới việc 2 từ giống nhau sẽ bị coi là khác nhau 
-    Chuẩn hóa tất cả về 1 loại là unicode dựng sẵn
-    """
-    def chuan_hoa_unicode(self, text):
-        text = unicodedata.normalize('NFC', text)
-        return text
+from emot.emo_unicode import UNICODE_EMOJI
+from pyvi import ViTokenizer, ViPosTagger, ViUtils
+import joblib
+from scipy.sparse import hstack
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+import os
 
 
-    """
-    Có 2 kiểu gõ dấu ở Tiếng Việt, ví dụ như là : òa hoặc oà (ta gọi lần lượt là chuẩn 1 và 2). Mặc dù kiểu gõ chữ sau ít 
-    phổ biến hơn tuy nhiên vẫn cần phải chuẩn hóa tránh việc một số văn bản vẫn sử dụng kiểu gõ dấu thứ 2.
-    
-    Hàm này xử lý chuẩn hóa từng từ một, sau khi chuẩn hóa từng từ thì ta sẽ đi chuân hóa từng câu sau 
-    """ 
-    def chuan_hoa_dau_tu_tieng_viet(self, word):
-        if not self.is_valid_vietnam_word(word):
-            return word
-    
-        chars = list(word)
-        dau_cau = 0
-        nguyen_am_index = []
-        qu_or_gi = False
-        for index, char in enumerate(chars):
-            x, y = self.nguyen_am_to_ids.get(char, (-1, -1))
-            if x == -1:
-                continue
-            elif x == 9:  # check qu
-                if index != 0 and chars[index - 1] == 'q':
-                    chars[index] = 'u'
-                    qu_or_gi = True
-            elif x == 5:  # check gi
-                if index != 0 and chars[index - 1] == 'g':
-                    chars[index] = 'i'
-                    qu_or_gi = True
-            if y != 0:
-                dau_cau = y
-                chars[index] = self.bang_nguyen_am[x][0]
-            if not qu_or_gi or index != 1:
-                nguyen_am_index.append(index)
-        if len(nguyen_am_index) < 2:
-            if qu_or_gi:
-                if len(chars) == 2:
-                    x, y = self.nguyen_am_to_ids.get(chars[1])
-                    chars[1] = self.bang_nguyen_am[x][dau_cau]
-                else:
-                    x, y = self.nguyen_am_to_ids.get(chars[2], (-1, -1))
-                    if x != -1:
-                        chars[2] = self.bang_nguyen_am[x][dau_cau]
-                    else:
-                        chars[1] = self.bang_nguyen_am[5][dau_cau] if chars[1] == 'i' else self.bang_nguyen_am[9][dau_cau]
-                return ''.join(chars)
-            return word
-    
-        for index in nguyen_am_index:
-            x, y = self.nguyen_am_to_ids[chars[index]]
-            if x == 4 or x == 8:  # ê, ơ
-                chars[index] = self.bang_nguyen_am[x][dau_cau]
-                return ''.join(chars)
-    
-        if len(nguyen_am_index) == 2:
-            if nguyen_am_index[-1] == len(chars) - 1:
-                x, y = self.nguyen_am_to_ids[chars[nguyen_am_index[0]]]
-                chars[nguyen_am_index[0]] = self.bang_nguyen_am[x][dau_cau]
-            else:
-                x, y = self.nguyen_am_to_ids[chars[nguyen_am_index[1]]]
-                chars[nguyen_am_index[1]] = self.bang_nguyen_am[x][dau_cau]
+"""check repeated character in word"""
+
+
+def check_repeated_character(text):
+    text = re.sub('  +', ' ', text).strip()
+    count = {}
+    for i in range(len(text) - 1):
+        if text[i] == text[i + 1]:
+            return True
+    return False
+
+
+def check_space(text):  # check space in string
+    for i in range(len(text)):
+        if text[i] == ' ':
+            return True
+    return False
+
+
+def check_special_character_numberic(text):
+    return any(not c.isalpha() for c in text)
+
+
+# Remove emoji and emoticons
+def remove_emoji(text):
+    for emot in UNICODE_EMOJI:
+        text = str(text).replace(emot, ' ')
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+# Remove url
+def url(text):
+    text = re.sub(r'https?://\S+|www\.\S+', ' ', str(text))
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+# remove special character
+def special_character(text):
+    text = re.sub(r'\d+', lambda m: " ", text)
+    # text = re.sub(r'\b(\w+)\s+\1\b',' ', text) #remove duplicate number word
+    text = re.sub(r"[~!@#$%^&*()_+{}“”|:\"<>?`´\[\];\\\/.,-]", " ", text)
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+# normalize repeated characters
+def repeated_character(text):
+    text = re.sub(r'(\w)\1+', r'\1', text)
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+def mail(text):
+    text = re.sub(r'[^@]+@[^@]+\.[^@]+', ' ', text)
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+# remove mention tag and hashtag
+def tag(text):
+    text = re.sub(r"(?:\@|\#|\://)\S+", " ", text)
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+# """Remove all mixed words and numbers"""
+def mixed_word_number(text):
+    text = ' '.join(s for s in text.split() if not any(c.isdigit() for c in s))
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+# tokenize by lib Pyvi
+def tokenize(text):
+    text = str(text)
+    text = ViTokenizer.tokenize(text)
+    return text
+
+
+""" emoji """
+c2e_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/character2emoji.xlsx')
+character2emoji = pd.read_excel(c2e_path)  # character to emoji
+
+
+def convert_character2emoji(text):
+    text = str(text)
+    for i in range(character2emoji.shape[0]):
+        text = text.replace(character2emoji.at[i, 'character'], " " + character2emoji.at[i, 'emoji'] + " ")
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+e2w_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/emoji2word.xlsx')
+emoji2word = pd.read_excel(e2w_path)  # emoji to word
+
+
+def convert_emoji2word(text):
+    for i in range(emoji2word.shape[0]):
+        text = text.replace(emoji2word.at[i, 'emoji'], " " + emoji2word.at[i, 'word_vn'] + " ")
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+""" abbreviation """
+adn_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/abb_dict_normal.xlsx')
+abb_dict_normal = pd.read_excel(adn_path)
+
+
+def abbreviation_normal(text):  # len word equal 1
+    text = str(text)
+    temp = ''
+    for word in text.split():
+        for i in range(abb_dict_normal.shape[0]):
+            if str(abb_dict_normal.at[i, 'abbreviation']) == str(word):
+                word = str(abb_dict_normal.at[i, 'meaning'])
+        temp = temp + ' ' + word
+    text = temp
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+ads_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/abb_dict_special.xlsx')
+abb_dict_special = pd.read_excel(ads_path)
+
+
+def abbreviation_special(text):  # including special character and number
+    text = ' ' + str(text) + ' '
+    for i in range(abb_dict_special.shape[0]):
+        text = text.replace(' ' + abb_dict_special.at[i, 'abbreviation'] + ' ',
+                            ' ' + abb_dict_special.at[i, 'meaning'] + ' ')
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+def special_character_1(text):  # remove dot and comma
+    text = re.sub("[.,?!]", " ", text)
+    text = re.sub('  +', ' ', text).strip()
+    return text
+
+
+def abbreviation_kk(text):
+    text = str(text)
+    for t in text.split():
+        if 'kk' in t:
+            text = text.replace(t, ' ha ha ')
         else:
-            x, y = self.nguyen_am_to_ids[chars[nguyen_am_index[1]]]
-            chars[nguyen_am_index[1]] = self.bang_nguyen_am[x][dau_cau]
-        return ''.join(chars)
-    
-
-    def is_valid_vietnam_word(self, word):
-        chars = list(word)
-        nguyen_am_index = -1
-        for index, char in enumerate(chars):
-            x, y = self.nguyen_am_to_ids.get(char, (-1, -1))
-            if x != -1:
-                if nguyen_am_index == -1:
-                    nguyen_am_index = index
+            if 'kaka' in t:
+                text = text.replace(t, ' ha ha ')
+            else:
+                if 'kiki' in t:
+                    text = text.replace(t, ' ha ha ')
                 else:
-                    if index - nguyen_am_index != 1:
-                        return False
-                    nguyen_am_index = index
-        return True
-    
-
-    """
-    Chuyển câu tiếng việt về chuẩn gõ dấu kiểu cũ.
-    :param sentence:
-    :return:
-    """
-    def chuan_hoa_dau_cau_tieng_viet(self, sentence):
-        sentence = self.chuyen_chu_thuong(sentence)
-        words = sentence.split()
-        for index, word in enumerate(words):
-            cw = re.sub(r'(^\p{P}*)([p{L}.]*\p{L}+)(\p{P}*$)', r'\1/\2/\3', word).split('/')
-            # print(cw)
-            if len(cw) == 3:
-                cw[1] = self.chuan_hoa_dau_tu_tieng_viet(cw[1])
-            words[index] = ''.join(cw)
-        return ' '.join(words).strip()
-    
-
-    # Đưa về chữ viết thường 
-    def chuyen_chu_thuong(self, text):
-        return text.lower()
-    
-
-    #Xóa html
-    def xoa_url(self, text):
-        return re.sub(r"\S*https?:\S*", "", text)
-    
-
-    #Xoa ngoac va noi dung trong ngoac
-    def xoa_ngoac(self, text):
-        text = re.sub(r'\[.*?\]|\(.*?\)|<.*?>|\{.*?\}', '', text)
-        return re.sub(r'\s+', ' ', text)
-
-    # Xóa đi các dấu cách thừa các từ không cần thiết cho việc phân loại vẳn bản 
-    def chuan_hoa_cau(self, text):
-        text = re.sub(r'[^\s\wáàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệóòỏõọôốồổỗộơớờởỡợíìỉĩịúùủũụưứừửữựýỳỷỹỵđ_]',' ',text)
-        text = re.sub(r'\s+', ' ', text).strip()
-        return text
-    
-
-    # chuan hoa teencode: vn -> Việt Nam
-    def de_teencode(self, text):
-        nText = ""
-        for word in text.split():
-            nText += ''.join(p.teencode_list.get(word, word)+ " ")
-        return nText.strip()
+                    if 'haha' in t:
+                        text = text.replace(t, ' ha ha ')
+                    else:
+                        if 'hihi' in t:
+                            text = text.replace(t, ' ha ha ')
+    text = re.sub('  +', ' ', text).strip()
+    return text
 
 
-    def remove_html(self, text):
-        return re.sub(r'<[^>]*>', '', text)
+def annotations(dataset):
+    pos = []
+    max_len = 8000
+    for i in range(dataset.shape[0]):
+        n = len(dataset.at[i, 'cmt'])
+        l = [0] * max_len
+        s = int(dataset.at[i, 'start_index'])
+        e = int(dataset.at[i, 'end_index'])
+        for j in range(s, e):
+            l[j] = 1
+        pos.append(l)
+    return pos
 
 
-    def remove_emoji(self, text):
-        return emoji.replace_emoji(text, replace='')
-    
+def abbreviation_predict(t):
+    model_path = os.path.join(os.getcwd(), 'vnpreprocess/model/abb_model.sav')
+    loaded_model = joblib.load(model_path)
 
-    def tien_xu_li(self, text):
-        text = self.remove_html(text)
-        text = self.xoa_url(text)
-        text = self.xoa_ngoac(text)
-        text = self.chuan_hoa_cau(text)
-        text = self.chuyen_chu_thuong(text)
-        text = self.de_teencode(text)
-        text = self.remove_emoji(text)
-        text = self.chuan_hoa_unicode(text)
-        text = self.chuan_hoa_dau_cau_tieng_viet(text)
-        return text
+    da_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/abbreviation_dictionary_vn.xlsx')
+    train_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/train_duplicate_abb_data.xlsx')
+    dev_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/dev_duplicate_abb_data.xlsx')
+    test_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/test_duplicate_abb_data.xlsx')
+    duplicate_abb = pd.read_excel(da_path, sheet_name='duplicate', header=None)
+    duplicate_abb = list(duplicate_abb[0])
+
+    train_duplicate_abb_data = pd.read_excel(train_path)
+    dev_duplicate_abb_data = pd.read_excel(dev_path)
+    test_duplicate_abb_data = pd.read_excel(test_path)
+    duplicate_abb_data = pd.concat([train_duplicate_abb_data, dev_duplicate_abb_data, test_duplicate_abb_data],
+                                   ignore_index=True)
+    duplicate_abb_data = duplicate_abb_data.drop_duplicates(keep='last').reset_index(drop=True)
+
+    X = duplicate_abb_data[['abb', 'start_index', 'end_index', 'cmt']]
+    y = duplicate_abb_data['origin']
+
+    from sklearn import preprocessing
+    le = preprocessing.LabelEncoder()
+    y = le.fit_transform(y)
+    enc = DictVectorizer()
+    Tfidf_vect = TfidfVectorizer(max_features=1200)
+
+    temp = annotations(X)
+    X_pos = sparse.csr_matrix(np.asarray(temp))
+    X_abb = enc.fit_transform(X[['abb']].to_dict('records'))
+    X_text = Tfidf_vect.fit_transform(X['cmt'])
+    X = hstack((X_abb, X_pos, X_text))
+
+    text = str(t)
+    max_len = 8000
+    if len(t) > max_len:
+        text = t[:max_len]
+
+    cmt = ' ' + text + ' '
+    for abb in duplicate_abb:
+        start_index = 0
+        count = 0
+        while start_index > -1:  # start_index = -1 -> abb is not in cmt
+            start_index = cmt.find(' ' + abb + ' ')  # find will return FIRST index abb in cmt
+            if start_index > -1:
+                end_index = start_index + len(abb)
+                t = pd.DataFrame([[abb, start_index, end_index, text]],
+                                 columns=['abb', 'start_index', 'end_index', 'cmt'], index=None)
+                temp = annotations(t)
+                X_pos = sparse.csr_matrix(np.asarray(temp))
+
+                X_abb = enc.transform(t[['abb']].to_dict('records'))
+                # print(t['cmt'])
+                X_text = Tfidf_vect.transform([text])
+
+                X = hstack((X_abb, X_pos, X_text))
+                predict = loaded_model.predict(X)
+                origin = le.inverse_transform(predict.argmax(axis=1))
+                origin = ''.join(origin)
+                text = text[:start_index + count * (len(origin) - len(abb))] + origin + text[end_index + count * (
+                            len(origin) - len(abb)):]
+                text = ''.join(text)
+                count = count + 1
+                for i in range(start_index + 1, end_index + 1):  # replace abb to space ' '
+                    cmt = cmt[:i] + ' ' + cmt[i + 1:]
+    return text
+
+
+def preprocessing(text):
+    text = text.lower()
+    text = convert_character2emoji(text)
+    text = url(text)
+    text = mail(text)
+    text = tag(text)
+    text = mixed_word_number(text)
+    text = special_character_1(text)  # ##remove , . ? !
+    text = abbreviation_kk(text)
+    text = abbreviation_special(text)
+    text = convert_character2emoji(text)
+    text = remove_emoji(text)
+    text = repeated_character(text)
+    text = special_character(text)
+    text = abbreviation_normal(text)
+    text = abbreviation_predict(text)
+    text = tokenize(text)
+    return text

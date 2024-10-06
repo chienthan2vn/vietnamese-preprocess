@@ -1,1 +1,4 @@
-include vietnamese-preprocess/src/vnpreprocess/dictionary/teencode.txt
+include README.md
+global-exclude *.xlsx
+global-exclude *.txt
+include vietnamese-preprocess/src/vnpreprocess/model/abb_model.sav

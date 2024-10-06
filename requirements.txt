@@ -1,3 +1,10 @@
 unicodedata2
 setuptools
 emoji
+pandas
+emot
+pyvi
+joblib
+scipy
+scikit-learn
+openpyxl
