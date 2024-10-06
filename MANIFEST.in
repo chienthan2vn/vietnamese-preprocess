@@ -1,2 +1,2 @@
-include src/vnpreprocess/dictionary/*.xlsx
+include src/vnpreprocess/dictionary/*
 include src/vnpreprocess/model/abb_model.sav

@@ -12,9 +12,6 @@ import os
 from importlib import resources
 from sklearn import preprocessing
 
-model_path = os.path.join(resources.files("vnpreprocess"),'model/abb_model.sav')
-loaded_model = joblib.load(model_path)
-le = preprocessing.LabelEncoder()
 
 """check repeated character in word"""
 
@@ -214,7 +211,18 @@ def annotations(dataset):
     return pos
 
 
+sw_path = os.path.join(resources.files("vnpreprocess"),'dictionary/vn_stopwords.txt')
+swlist = open(sw_path).readlines()
+def remove_stopwords(text):
+    for line in swlist:
+        if line.strip() in text:
+            text = text.replace(line.strip(), "")
+    return text
+
+
 def abbreviation_predict(t):
+    model_path = os.path.join(resources.files("vnpreprocess"),'model/abb_model.sav')
+    loaded_model = joblib.load(model_path)
     da_path = os.path.join(resources.files("vnpreprocess"),'dictionary/abbreviation_dictionary_vn.xlsx')
     train_path = os.path.join(resources.files("vnpreprocess"),'dictionary/train_duplicate_abb_data.xlsx')
     dev_path = os.path.join(resources.files("vnpreprocess"),'dictionary/dev_duplicate_abb_data.xlsx')
@@ -266,6 +274,8 @@ def abbreviation_predict(t):
 
                 X = hstack((X_abb, X_pos, X_text))
                 predict = loaded_model.predict(X)
+
+                le = preprocessing.LabelEncoder()
                 origin = le.inverse_transform(predict.argmax(axis=1))
                 origin = ''.join(origin)
                 text = text[:start_index + count * (len(origin) - len(abb))] + origin + text[end_index + count * (
@@ -294,6 +304,8 @@ def preprocessing(text):
     text = special_character(text)
     text = abbreviation_normal(text)
     text = abbreviation_predict(text)
+    text = remove_multispace(text)
+    text = remove_stopwords(text)
     text = remove_multispace(text)
     text = tokenize(text)
     return text
