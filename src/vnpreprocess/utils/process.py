@@ -10,7 +10,11 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 import os
 from importlib import resources
+from sklearn import preprocessing
 
+model_path = os.path.join(resources.files("vnpreprocess"),'model/abb_model.sav')
+loaded_model = joblib.load(model_path)
+le = preprocessing.LabelEncoder()
 
 """check repeated character in word"""
 
@@ -190,9 +194,6 @@ def annotations(dataset):
 
 
 def abbreviation_predict(t):
-    model_path = os.path.join(resources.files("vnpreprocess"),'model/abb_model.sav')
-    loaded_model = joblib.load(model_path)
-
     da_path = os.path.join(resources.files("vnpreprocess"),'dictionary/abbreviation_dictionary_vn.xlsx')
     train_path = os.path.join(resources.files("vnpreprocess"),'dictionary/train_duplicate_abb_data.xlsx')
     dev_path = os.path.join(resources.files("vnpreprocess"),'dictionary/dev_duplicate_abb_data.xlsx')
@@ -210,8 +211,6 @@ def abbreviation_predict(t):
     X = duplicate_abb_data[['abb', 'start_index', 'end_index', 'cmt']]
     y = duplicate_abb_data['origin']
 
-    from sklearn import preprocessing
-    le = preprocessing.LabelEncoder()
     y = le.fit_transform(y)
     enc = DictVectorizer()
     Tfidf_vect = TfidfVectorizer(max_features=1200)
