@@ -93,7 +93,7 @@ def tokenize(text):
 
 
 """ emoji """
-c2e_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/character2emoji.xlsx')
+c2e_path = 'vnpreprocess/dictionary/character2emoji.xlsx'
 character2emoji = pd.read_excel(c2e_path)  # character to emoji
 
 
@@ -105,7 +105,7 @@ def convert_character2emoji(text):
     return text
 
 
-e2w_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/emoji2word.xlsx')
+e2w_path = 'vnpreprocess/dictionary/emoji2word.xlsx'
 emoji2word = pd.read_excel(e2w_path)  # emoji to word
 
 
@@ -117,7 +117,7 @@ def convert_emoji2word(text):
 
 
 """ abbreviation """
-adn_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/abb_dict_normal.xlsx')
+adn_path = 'vnpreprocess/dictionary/abb_dict_normal.xlsx'
 abb_dict_normal = pd.read_excel(adn_path)
 
 
@@ -134,7 +134,7 @@ def abbreviation_normal(text):  # len word equal 1
     return text
 
 
-ads_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/abb_dict_special.xlsx')
+ads_path = 'vnpreprocess/dictionary/abb_dict_special.xlsx'
 abb_dict_special = pd.read_excel(ads_path)
 
 
@@ -189,13 +189,13 @@ def annotations(dataset):
 
 
 def abbreviation_predict(t):
-    model_path = os.path.join(os.getcwd(), 'vnpreprocess/model/abb_model.sav')
+    model_path = 'vnpreprocess/model/abb_model.sav'
     loaded_model = joblib.load(model_path)
 
-    da_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/abbreviation_dictionary_vn.xlsx')
-    train_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/train_duplicate_abb_data.xlsx')
-    dev_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/dev_duplicate_abb_data.xlsx')
-    test_path = os.path.join(os.getcwd(), 'vnpreprocess/dictionary/test_duplicate_abb_data.xlsx')
+    da_path = 'vnpreprocess/dictionary/abbreviation_dictionary_vn.xlsx'
+    train_path = 'vnpreprocess/dictionary/train_duplicate_abb_data.xlsx'
+    dev_path = 'vnpreprocess/dictionary/dev_duplicate_abb_data.xlsx'
+    test_path = 'vnpreprocess/dictionary/test_duplicate_abb_data.xlsx'
     duplicate_abb = pd.read_excel(da_path, sheet_name='duplicate', header=None)
     duplicate_abb = list(duplicate_abb[0])
 
