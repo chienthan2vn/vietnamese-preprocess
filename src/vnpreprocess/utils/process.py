@@ -240,6 +240,7 @@ def abbreviation_predict(t):
     X = duplicate_abb_data[['abb', 'start_index', 'end_index', 'cmt']]
     y = duplicate_abb_data['origin']
 
+    le = preprocessing.LabelEncoder()
     y = le.fit_transform(y)
     enc = DictVectorizer()
     Tfidf_vect = TfidfVectorizer(max_features=1200)
@@ -275,7 +276,6 @@ def abbreviation_predict(t):
                 X = hstack((X_abb, X_pos, X_text))
                 predict = loaded_model.predict(X)
 
-                le = preprocessing.LabelEncoder()
                 origin = le.inverse_transform(predict.argmax(axis=1))
                 origin = ''.join(origin)
                 text = text[:start_index + count * (len(origin) - len(abb))] + origin + text[end_index + count * (
@@ -303,7 +303,7 @@ def preprocessing(text):
     text = repeated_character(text)
     text = special_character(text)
     text = abbreviation_normal(text)
-    text = abbreviation_predict(text)
+    # text = abbreviation_predict(text)
     text = remove_multispace(text)
     text = remove_stopwords(text)
     text = remove_multispace(text)
