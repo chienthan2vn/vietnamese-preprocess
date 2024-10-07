@@ -212,7 +212,7 @@ def annotations(dataset):
 
 
 sw_path = os.path.join(resources.files("vnpreprocess"),'dictionary/vn_stopwords.txt')
-swlist = open(sw_path).readlines()
+swlist = open(sw_path, 'r', encoding='utf-8').readlines()
 def remove_stopwords(text):
     for line in swlist:
         if line.strip() in text:
