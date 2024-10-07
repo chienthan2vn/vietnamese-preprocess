@@ -212,12 +212,11 @@ def annotations(dataset):
 
 
 sw_path = os.path.join(resources.files("vnpreprocess"),'dictionary/vn_stopwords.txt')
-swlist = open(sw_path, 'r', encoding='utf-8').readlines()
+vn_stopwords = [text.strip() for text in open(sw_path, 'r', encoding='utf-8').readlines()]
 def remove_stopwords(text):
-    for line in swlist:
-        if line.strip() in text:
-            text = text.replace(line.strip(), "")
-    return text
+    words = text.split()
+    words = [word.strip() for word in words if word not in vn_stopwords]
+    return ' '.join(words)
 
 
 def abbreviation_predict(t):
