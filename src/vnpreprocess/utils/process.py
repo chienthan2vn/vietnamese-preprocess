@@ -10,7 +10,7 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 import os
 from importlib import resources
-from sklearn import preprocessing
+from sklearn.preprocessing import LabelEncoder
 
 
 """check repeated character in word"""
@@ -239,7 +239,7 @@ def abbreviation_predict(t):
     X = duplicate_abb_data[['abb', 'start_index', 'end_index', 'cmt']]
     y = duplicate_abb_data['origin']
 
-    le = preprocessing.LabelEncoder()
+    le = LabelEncoder()
     y = le.fit_transform(y)
     enc = DictVectorizer()
     Tfidf_vect = TfidfVectorizer(max_features=1200)
@@ -302,9 +302,9 @@ def preprocessing(text):
     text = repeated_character(text)
     text = special_character(text)
     text = abbreviation_normal(text)
-    # text = abbreviation_predict(text)
+    text = abbreviation_predict(text)
     text = remove_multispace(text)
     text = remove_multispace(text)
-    # text = tokenize(text)
-    # text = remove_stopwords(text)
+    text = tokenize(text)
+    text = remove_stopwords(text)
     return text
