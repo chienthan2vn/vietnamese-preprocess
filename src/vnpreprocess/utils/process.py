@@ -302,9 +302,9 @@ def preprocessing(text):
     text = repeated_character(text)
     text = special_character(text)
     text = abbreviation_normal(text)
-    text = abbreviation_predict(text)
+    # text = abbreviation_predict(text)
     text = remove_multispace(text)
     text = remove_multispace(text)
-    text = tokenize(text)
-    text = remove_stopwords(text)
+    # text = tokenize(text)
+    # text = remove_stopwords(text)
     return text
